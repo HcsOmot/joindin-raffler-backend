@@ -216,6 +216,7 @@ class RaffleContext implements Context
 
     /**
      * @Then we cannot continue raffling
+     * @Then we get an exception for a raffle with no comments
      */
     public function weCannotContinueRaffling()
     {

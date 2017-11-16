@@ -23,3 +23,12 @@ Feature:
 
   Scenario: Organizer will try to start a raffle with no events
     Then we get an exception for a raffle with no meetups
+
+  Scenario: Organizer will try to start a raffle with events not having any comments
+    Given we have these uncommented meetups in the system
+      | id | title     | date       |
+      | 1  | Meetup #1 | 2017-01-19 |
+      | 2  | Meetup #2 | 2017-02-19 |
+      | 3  | Meetup #3 | 2017-03-19 |
+    When organizer picks to raffle meetups: "1,3"
+    Then we get an exception for a raffle with no comments
