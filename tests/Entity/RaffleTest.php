@@ -2,7 +2,9 @@
 
 namespace App\Tests\Entity;
 
+use App\Entity\JoindInTalk;
 use App\Entity\Raffle;
+use App\Exception\NoCommentsToRaffleException;
 use App\Exception\NoEventsToRaffleException;
 use Doctrine\Common\Collections\Collection;
 use Mockery;
@@ -21,6 +23,8 @@ class RaffleTest extends TestCase
     private $id;
     /** @var MockInterface|Collection */
     private $events;
+    /** @var MockInterface|\App\Entity\JoindInTalk */
+    private $talk;
     /** @var Raffle */
     private $raffle;
 
@@ -61,6 +65,15 @@ class RaffleTest extends TestCase
     public function testGetCommentsEligibleForRaffling()
     {
         $this->markTestSkipped('Skipping');
+    }
+
+    public function testCannotStartARaffleWithNoCommentsInEvents()
+    {
+        $this->expectException(NoCommentsToRaffleException::class);
+        $this->events->shouldReceive('getTalks')->andReturn(JoindInTalk::class);
+
+
+        $this->raffle->pick();
     }
 
     public function testPick()
