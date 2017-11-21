@@ -7,6 +7,7 @@ use App\Entity\Raffle;
 use App\Exception\NoCommentsToRaffleException;
 use App\Exception\NoEventsToRaffleException;
 use Behat\Behat\Context\Context;
+use PhpParser\Node\Stmt\TryCatch;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Webmozart\Assert\Assert;
@@ -24,6 +25,7 @@ class RaffleContext implements Context
     private $raffleId;
     /** @var JoindInUser|null */
     private $picked;
+    private $exceptionHappened;
 
     public function __construct(KernelInterface $kernel)
     {
@@ -44,7 +46,12 @@ class RaffleContext implements Context
 
         $this->raffleId = Uuid::uuid4()->toString();
 
-        $raffle = new Raffle($this->raffleId, $events);
+        try {
+            $raffle = new Raffle($this->raffleId, $events);
+        } catch (\Exception $exception){
+            $this->exceptionHappened = $exception;
+            return;
+        }
 
         $this->getEntityManager()->persist($raffle);
         $this->getEntityManager()->flush();
@@ -216,7 +223,6 @@ class RaffleContext implements Context
 
     /**
      * @Then we cannot continue raffling
-     * @Then we get an exception for a raffle with no comments
      */
     public function weCannotContinueRaffling()
     {
@@ -232,6 +238,14 @@ class RaffleContext implements Context
         } catch (Exception $exception) {
             throw $exception;
         }
+    }
+
+    /**
+     * @Then we get an exception for a raffle with no comments
+     */
+    public function weGetAnExceptionForARaffleWithNoComments()
+    {
+        Assert::notNull($this->exceptionHappened);
     }
 
     protected function getService(string $name)

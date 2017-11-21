@@ -196,6 +196,14 @@ class RaffleApiContext implements Context
         Assert::true($response['error']);
     }
 
+    /**
+     * @Then we get an exception for a raffle with no comments
+     */
+    public function weGetAnExceptionForARaffleWithNoComments()
+    {
+        Assert::eq("Something went wrong. Please hang up and try again.",$this->raffleId);
+    }
+
     private function apiGetJson(string $url)
     {
         $response = $this->getGuzzle()->get($this->testApiUrl.$url);
