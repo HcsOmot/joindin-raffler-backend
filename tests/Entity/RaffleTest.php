@@ -39,12 +39,31 @@ class RaffleTest extends TestCase
     {
 
         // Arrange.
+        $talk1 = Mockery::mock(JoindInTalk::class);
+        $talk1->shouldReceive('getCommentCount')->andReturn(0);
 
-        $event1 = new JoindInEvent(1, 'Meetup #1', new \DateTime());
-        $talk1 = new JoindInTalk(1, 'Cool talk', $event1);
+        $event1 = Mockery::mock(JoindInEvent::class);
+        $event1->shouldReceive('getTalks')->andReturn(new ArrayCollection([$talk1]));
 
-        $event1->addTalk($talk1);
         $events = new ArrayCollection([$event1]);
+
+        // Act.
+
+        new Raffle('id', $events);
+    }
+
+    /**
+     * @expectedException \App\Exception\NoCommentsToRaffleException
+     */
+    public function testCannotStartARaffleWhenThereAreNoTalksOnSelectedEvents()
+    {
+
+        // Arrange.
+        $event1 = new JoindInEvent(1,'Meetup 1', new \DateTime());;
+        $event2 = new JoindInEvent(2,'Meetup 2', new \DateTime());;
+        $event3 = new JoindInEvent(3,'Meetup 3', new \DateTime());
+
+        $events = new ArrayCollection([$event1,$event2,$event3]);
 
         // Act.
 
