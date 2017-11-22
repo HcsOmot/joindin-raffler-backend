@@ -7,7 +7,6 @@ use App\Entity\Raffle;
 use App\Exception\NoCommentsToRaffleException;
 use App\Exception\NoEventsToRaffleException;
 use Behat\Behat\Context\Context;
-use PhpParser\Node\Stmt\TryCatch;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Webmozart\Assert\Assert;
@@ -48,8 +47,9 @@ class RaffleContext implements Context
 
         try {
             $raffle = new Raffle($this->raffleId, $events);
-        } catch (\Exception $exception){
+        } catch (\Exception $exception) {
             $this->exceptionHappened = $exception;
+
             return;
         }
 

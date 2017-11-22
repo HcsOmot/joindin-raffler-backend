@@ -76,14 +76,13 @@ class Raffle implements \JsonSerializable
         foreach ($events as $event) {
             /** @var \App\Entity\JoindInTalk $talk */
             foreach ($event->getTalks() as $talk) {
-                $commentsCount+=$talk->getCommentCount();
+                $commentsCount += $talk->getCommentCount();
             }
         }
 
         if (0 === $commentsCount) {
             throw NoCommentsToRaffleException::forRaffle($id);
         }
-
 
         $this->id        = $id;
         $this->events    = $events;

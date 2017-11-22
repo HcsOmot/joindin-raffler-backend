@@ -2,18 +2,12 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\JoindInComment;
 use App\Entity\JoindInEvent;
 use App\Entity\JoindInTalk;
-use App\Entity\JoindInUser;
 use App\Entity\Raffle;
-use App\Exception\NoCommentsToRaffleException;
-use App\Exception\NoEventsToRaffleException;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
-use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -35,9 +29,8 @@ class RaffleTest extends TestCase
     /**
      * @expectedException \App\Exception\NoCommentsToRaffleException
      */
-    public function testCannotStartARaffleWithNoCommentsInEvents()
+    public function testCannotStartRaffleWithNoCommentsInEvents()
     {
-
         // Arrange.
         $talk1 = Mockery::mock(JoindInTalk::class);
         $talk1->shouldReceive('getCommentCount')->andReturn(0);
@@ -55,15 +48,14 @@ class RaffleTest extends TestCase
     /**
      * @expectedException \App\Exception\NoCommentsToRaffleException
      */
-    public function testCannotStartARaffleWhenThereAreNoTalksOnSelectedEvents()
+    public function testCannotStartRaffleWhenThereAreNoTalksOnSelectedEvents()
     {
-
         // Arrange.
-        $event1 = new JoindInEvent(1,'Meetup 1', new \DateTime());;
-        $event2 = new JoindInEvent(2,'Meetup 2', new \DateTime());;
-        $event3 = new JoindInEvent(3,'Meetup 3', new \DateTime());
+        $event1 = new JoindInEvent(1, 'Meetup 1', new \DateTime());
+        $event2 = new JoindInEvent(2, 'Meetup 2', new \DateTime());
+        $event3 = new JoindInEvent(3, 'Meetup 3', new \DateTime());
 
-        $events = new ArrayCollection([$event1,$event2,$event3]);
+        $events = new ArrayCollection([$event1, $event2, $event3]);
 
         // Act.
 
@@ -72,7 +64,6 @@ class RaffleTest extends TestCase
 
     public function testRaffleWillBeCreated()
     {
-
         // Arrange.
 
         $talk1 = Mockery::mock(JoindInTalk::class);
@@ -94,7 +85,6 @@ class RaffleTest extends TestCase
 
     public function testRaffleWillBeCreated2()
     {
-
         // Arrange.
 
         $talk1 = Mockery::mock(JoindInTalk::class);
@@ -113,5 +103,4 @@ class RaffleTest extends TestCase
 
         $this->assertInstanceOf(Raffle::class, $raffle);
     }
-
 }

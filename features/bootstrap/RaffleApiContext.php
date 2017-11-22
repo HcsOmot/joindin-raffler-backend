@@ -201,7 +201,7 @@ class RaffleApiContext implements Context
      */
     public function weGetAnExceptionForARaffleWithNoComments()
     {
-        Assert::eq("Something went wrong. Please hang up and try again.",$this->raffleId);
+        Assert::eq('Something went wrong. Please hang up and try again.', $this->raffleId);
     }
 
     private function apiGetJson(string $url)
