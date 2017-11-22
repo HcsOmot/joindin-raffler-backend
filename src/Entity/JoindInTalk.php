@@ -102,7 +102,8 @@ class JoindInTalk implements \JsonSerializable
         $this->comments->add($comment);
     }
 
-    public function getCommentCount() : int{
+    public function getCommentCount(): int
+    {
         return count($this->comments);
     }
 
