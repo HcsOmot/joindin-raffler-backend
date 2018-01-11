@@ -20,8 +20,18 @@ class UserFixtures extends AbstractFixture implements OrderedFixtureInterface
         $admin->setPlainPassword('admin');
         $admin->setRoles(['ROLE_SUPER_ADMIN']);
 
+        $user = new User();
+        $user->setUsername('non.admin');
+        $user->setEmail('non.admin@domain.com');
+        $user->setEnabled(true);
+        $user->setPlainPassword('non.admin');
+        $user->setRoles(['ROLE_USER']);
+
         $manager->persist($admin);
         $this->addReference('user-admin', $admin);
+
+        $manager->persist($user);
+        $this->addReference('user-regular', $user);
 
         $manager->flush();
     }
