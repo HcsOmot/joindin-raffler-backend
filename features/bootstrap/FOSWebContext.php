@@ -2,23 +2,63 @@
 
 declare(strict_types=1);
 
+use App\DataFixtures\ORM\UserFixtures;
 use Behat\Behat\Context\Context;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Mink\Driver\BrowserKitDriver;
 use Behat\Mink\Exception\UnsupportedDriverActionException;
 use Behat\MinkExtension\Context\MinkContext;
+use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
+use Doctrine\Common\DataFixtures\Loader;
+use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Webmozart\Assert\Assert;
 
 class FOSWebContext extends MinkContext implements Context
 {
     /** @var KernelInterface */
     private $kernel;
 
+    /** @var \Doctrine\ORM\EntityManager */
+    private $entityManager;
+
+    /**
+     * FOSWebContext constructor.
+     *
+     * @param \Symfony\Component\HttpKernel\KernelInterface $kernel
+     *
+     */
     public function __construct(KernelInterface $kernel)
     {
         $this->kernel = $kernel;
+        $this->entityManager = $this->getService('doctrine.orm.default_entity_manager');
+    }
+
+    /**
+     * @BeforeScenario
+     * @throws \Doctrine\ORM\Tools\ToolsException
+     */
+    public function loadUserDataFixtures(BeforeScenarioScope $scope)
+    {
+        $schemaTool = new SchemaTool($this->entityManager);
+        $schemaTool->dropDatabase();
+        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
+
+        $schemaTool->createSchema($metadata);
+        $userDataFixtures = new UserFixtures();
+
+        $fixturesLoader = new Loader();
+        $fixturesLoader->addFixture($userDataFixtures);
+
+        $ORMPurger = new ORMPurger();
+        $ORMPurger->setPurgeMode(ORMPurger::PURGE_MODE_DELETE);
+
+        $executor = new ORMExecutor($this->entityManager, $ORMPurger);
+        $executor->execute($fixturesLoader->getFixtures());
     }
 
     /**
@@ -27,6 +67,46 @@ class FOSWebContext extends MinkContext implements Context
     public function iVisit(string $url)
     {
         $this->visit($url);
+    }
+
+    /**
+     * @When I click :link
+     */
+    public function iClick(string $link)
+    {
+        $this->clickLink($link);
+    }
+
+    /**
+     * @Then I should see :rowText in the :rowIdentifier row
+     */
+    public function IShouldSeeIn(string $rowText, string $rowIdentifier)
+    {
+        $row = $this->findRowByText($rowIdentifier);
+        $text = $row->getText();
+        Assert::contains($text, $rowText);
+    }
+
+    /**
+     * @param $rowText
+     * @return \Behat\Mink\Element\NodeElement
+     */
+    private function findRowByText($rowText)
+    {
+        $row = $this->getSession()->getPage()->find('css', sprintf('table tr:contains("%s")', $rowText));
+        Assert::notNull($row, 'Cannot find a table row with this text!');
+        return $row;
+    }
+
+    /**
+     * @Given there is a regular user with username :username
+     */
+    public function thereIsRegularUserWithUsername(string $username)
+    {
+        $userManager = $this->getService('fos_user.user_manager');
+        $user        = $userManager->findUserByUsername($username);
+
+        Assert::notNull($user);
     }
 
     /**
